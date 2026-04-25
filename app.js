@@ -2,6 +2,14 @@ const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO'
 
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
+let currentFilter = 'todos';
+
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
 
 function getData() {
   return JSON.parse(localStorage.getItem('tabian_transactions') || '[]');
@@ -35,10 +43,14 @@ function changeMonth(dir) {
 function render() {
   const all = getData();
 
-  const monthTxs = all.filter(tx => {
+  
+const monthTxs = all.filter(tx => {
     const d = new Date(tx.date + 'T12:00:00');
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    const enMes = d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    const enFiltro = currentFilter === 'todos' || tx.type === currentFilter;
+    return enMes && enFiltro;
   });
+
 
   const totalIn = monthTxs.filter(t => t.type === 'ingreso').reduce((s, t) => s + t.amount, 0);
   const totalOut = monthTxs.filter(t => t.type === 'gasto').reduce((s, t) => s + t.amount, 0);
