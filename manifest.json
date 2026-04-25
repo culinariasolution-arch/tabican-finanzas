@@ -2,7 +2,7 @@
   "name": "TABIAN Construcciones · Finanzas",
   "short_name": "TABIAN",
   "description": "Control de ingresos y gastos",
-  "start_url": "/",
+  "start_url": "/tabican-finanzas/",
   "display": "standalone",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
