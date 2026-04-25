@@ -244,3 +244,32 @@ html {
 input, select, textarea {
   font-size: 16px;
 }
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #181818;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.month-nav button {
+  background: #222;
+  border: 1px solid #2a2a2a;
+  color: #f0f0f0;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+#month-label {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  flex: 1;
+}
+.balance-positive { color: #27ae60; }
+.balance-negative { color: #c0392b; }

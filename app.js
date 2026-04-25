@@ -1,3 +1,7 @@
+const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
 
 function getData() {
   return JSON.parse(localStorage.getItem('tabian_transactions') || '[]');
@@ -16,22 +20,42 @@ function fmtDate(iso) {
   return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function render() {
-  const data = getData();
+function updateMonthLabel() {
+  document.getElementById('month-label').textContent = MESES[currentMonth] + ' ' + currentYear;
+}
 
-  const totalIn = data.filter(t => t.type === 'ingreso').reduce((s, t) => s + t.amount, 0);
-  const totalOut = data.filter(t => t.type === 'gasto').reduce((s, t) => s + t.amount, 0);
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  updateMonthLabel();
+  render();
+}
+
+function render() {
+  const all = getData();
+
+  const monthTxs = all.filter(tx => {
+    const d = new Date(tx.date + 'T12:00:00');
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const totalIn = monthTxs.filter(t => t.type === 'ingreso').reduce((s, t) => s + t.amount, 0);
+  const totalOut = monthTxs.filter(t => t.type === 'gasto').reduce((s, t) => s + t.amount, 0);
   const balance = totalIn - totalOut;
 
   document.getElementById('total-ingresos').textContent = fmtMoney(totalIn);
   document.getElementById('total-gastos').textContent = fmtMoney(totalOut);
-  document.getElementById('balance').textContent = (balance >= 0 ? '+' : '') + fmtMoney(balance);
 
+  const balEl = document.getElementById('balance');
+  balEl.textContent = (balance >= 0 ? '+' : '') + fmtMoney(balance);
+  balEl.className = 'amount ' + (balance >= 0 ? 'balance-positive' : 'balance-negative');
+
+  const sorted = [...monthTxs].sort((a, b) => b.date.localeCompare(a.date));
   const list = document.getElementById('tx-list');
-  const sorted = [...data].sort((a, b) => b.date.localeCompare(a.date));
 
   if (sorted.length === 0) {
-    list.innerHTML = '<p style="text-align:center;color:#888;padding:40px">Sin movimientos</p>';
+    list.innerHTML = '<p style="text-align:center;color:#888;padding:40px">Sin movimientos este mes</p>';
     return;
   }
 
@@ -94,13 +118,19 @@ function saveTransaction() {
   data.push(tx);
   saveData(data);
 
+  const d = new Date(date + 'T12:00:00');
+  currentMonth = d.getMonth();
+  currentYear = d.getFullYear();
+  updateMonthLabel();
+
   closeModal();
   render();
 }
 
-// Arrancar
-render();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
+
+updateMonthLabel();
+render();
 
